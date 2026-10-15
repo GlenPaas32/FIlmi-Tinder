@@ -8,6 +8,10 @@
   box-sizing: border-box;
 }
 
+.swipe[hidden] {
+  display: none;
+}
+
 .swipe-header {
   width: 100%;
   max-width: 320px;

@@ -5,7 +5,7 @@ import MovieCard from '../components/MovieCard.jsx'
 import MatchModal from '../components/MatchModal.jsx'
 import './Swipe.css'
 
-export default function Swipe({ onShowMatches }) {
+export default function Swipe({ hidden, onShowMatches }) {
   const { room } = useRoom()
   const [movies, setMovies] = useState([])
   const [index, setIndex] = useState(0)
@@ -43,7 +43,7 @@ export default function Swipe({ onShowMatches }) {
   const movie = movies[index]
 
   return (
-    <main className="swipe">
+    <main className="swipe" hidden={hidden}>
       <header className="swipe-header">
         <span>
           Tuba <strong>{room.code}</strong>
@@ -97,7 +97,10 @@ export default function Swipe({ onShowMatches }) {
         <MatchModal
           movie={matchedMovie}
           onContinue={() => setMatchedMovie(null)}
-          onShowMatches={onShowMatches}
+          onShowMatches={() => {
+            setMatchedMovie(null)
+            onShowMatches()
+          }}
         />
       )}
     </main>
