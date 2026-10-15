@@ -119,7 +119,6 @@ export async function getMatches(roomId) {
     throw new Error(`Matchide pärimine ebaõnnestus: ${error.message}`);
   }
 
-  // Supabase tagastab iga rea kujul { movies: { id, title, ... } }, teisendame puhtaks Movie[] massiiviks
   return (data || [])
     .map((item) => item.movies)
     .filter(Boolean);
@@ -127,14 +126,15 @@ export async function getMatches(roomId) {
 
 /**
  * Kuulab Realtime'i kaudu uusi match'e spetsiifilises toas.
- * Tagastab koheselt unsubscribe funktsiooni.
  * @param {string} roomId 
- * @param {function(Movie): void} callback 
+ * @param {function(Object): void} callback 
  * @returns {function(): void} unsubscribe
  */
 export function onMatch(roomId, callback) {
+  const channelName = `realtime_matches_${roomId}_${Math.random().toString(36).substring(2, 7)}`;
+  
   const channel = supabase
-    .channel(`realtime_matches_${roomId}`)
+    .channel(channelName)
     .on(
       'postgres_changes',
       {
@@ -146,6 +146,7 @@ export function onMatch(roomId, callback) {
       async (payload) => {
         const movieId = payload.new.movie_id;
 
+        // Laeme uue matchitud filmi täielikud andmed
         const { data: movie, error } = await supabase
           .from('movies')
           .select('id, title, year, poster_url, genre')
@@ -159,6 +160,7 @@ export function onMatch(roomId, callback) {
     )
     .subscribe();
 
+  // Tagastame funktsiooni kuulamise lõpetamiseks
   return () => {
     supabase.removeChannel(channel);
   };
