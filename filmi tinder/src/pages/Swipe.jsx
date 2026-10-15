@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { getMovies, swipe } from '../api/mock.js'
+import { getMovies, swipe, onMatch } from '../api/mock.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import MovieCard from '../components/MovieCard.jsx'
+import MatchModal from '../components/MatchModal.jsx'
 import './Swipe.css'
 
 export default function Swipe({ onShowMatches }) {
@@ -11,6 +12,7 @@ export default function Swipe({ onShowMatches }) {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [matchedMovie, setMatchedMovie] = useState(null)
 
   useEffect(() => {
     getMovies()
@@ -18,6 +20,11 @@ export default function Swipe({ onShowMatches }) {
       .catch(() => setError('Filmide laadimine ebaõnnestus. Värskenda lehte.'))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = onMatch(room.roomId, setMatchedMovie)
+    return unsubscribe
+  }, [room.roomId])
 
   async function handleSwipe(liked) {
     const movie = movies[index]
@@ -85,6 +92,14 @@ export default function Swipe({ onShowMatches }) {
       )}
 
       {error && <p className="home-error" role="alert">{error}</p>}
+
+      {matchedMovie && (
+        <MatchModal
+          movie={matchedMovie}
+          onContinue={() => setMatchedMovie(null)}
+          onShowMatches={onShowMatches}
+        />
+      )}
     </main>
   )
 }
