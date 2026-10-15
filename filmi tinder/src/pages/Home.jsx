@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createRoom, joinRoom } from '../api/mock.js'
+import { createRoom, joinRoom } from '../api/index.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import './Home.css'
 

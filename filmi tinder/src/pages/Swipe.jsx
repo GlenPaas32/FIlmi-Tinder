@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMovies, swipe, onMatch } from '../api/mock.js'
+import { getMovies, swipe, onMatch } from '../api/index.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import MovieCard from '../components/MovieCard.jsx'
 import MatchModal from '../components/MatchModal.jsx'
