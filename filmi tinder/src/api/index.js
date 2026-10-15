@@ -1,14 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient';
 
-// VÕTMED loetakse .env failist (VITE_SUPABASE_URL ja VITE_SUPABASE_ANON_KEY)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Abifunktsioon toakoodi genereerimiseks (nt 6-kohaline suurtähtedega kood)
+// Abifunktsioon toakoodi genereerimiseks: täpselt 4 suurtähte (A–Z)
 function generateRoomCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 4; i++) {
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  return result;
 }
 
 /**
@@ -17,13 +16,17 @@ function generateRoomCode() {
  */
 export async function createRoom() {
   const code = generateRoomCode();
+  
   const { data, error } = await supabase
     .from('rooms')
     .insert([{ code }])
     .select('id, code')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(`Toa loomine ebaõnnestus: ${error.message}`);
+  }
+
   return { roomId: data.id, code: data.code };
 }
 
@@ -33,15 +36,25 @@ export async function createRoom() {
  * @returns {Promise<{ roomId: string }>}
  */
 export async function joinRoom(code) {
-  const cleanCode = code ? code.trim().toUpperCase() : '';
+  // Kontrollime, et kood on olemas
+  if (!code || typeof code !== 'string' || !code.trim()) {
+    throw new Error('Toakood on puudu.');
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+
   const { data, error } = await supabase
     .from('rooms')
     .select('id')
     .eq('code', cleanCode)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    throw new Error('Vale kood');
+  if (error) {
+    throw new Error(`Päringu viga: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('Sellise koodiga tuba ei leitud.');
   }
 
   return { roomId: data.id };
