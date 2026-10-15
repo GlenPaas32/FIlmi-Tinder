@@ -3,6 +3,7 @@ import { getMovies, swipe, onMatch } from '../api/index.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import MovieCard from '../components/MovieCard.jsx'
 import MatchModal from '../components/MatchModal.jsx'
+import GenreFilter from '../components/GenreFilter.jsx'
 import './Swipe.css'
 
 export default function Swipe({ hidden, onShowMatches }) {
@@ -13,6 +14,7 @@ export default function Swipe({ hidden, onShowMatches }) {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [matchedMovie, setMatchedMovie] = useState(null)
+  const [genres, setGenres] = useState(null) // null = žanrid veel valimata, [] = kõik
 
   useEffect(() => {
     getMovies()
@@ -26,8 +28,11 @@ export default function Swipe({ hidden, onShowMatches }) {
     return unsubscribe
   }, [room.roomId])
 
+  const deck = genres?.length ? movies.filter((m) => genres.includes(m.genre)) : movies
+  const choosing = genres === null
+  const movie = choosing ? null : deck[index]
+
   async function handleSwipe(liked) {
-    const movie = movies[index]
     setError('')
     setSending(true)
     try {
@@ -39,8 +44,6 @@ export default function Swipe({ hidden, onShowMatches }) {
       setSending(false)
     }
   }
-
-  const movie = movies[index]
 
   return (
     <main className="swipe" hidden={hidden}>
@@ -54,6 +57,10 @@ export default function Swipe({ hidden, onShowMatches }) {
       </header>
 
       {loading && <p>Laen filme…</p>}
+
+      {!loading && choosing && movies.length > 0 && (
+        <GenreFilter movies={movies} onStart={setGenres} />
+      )}
 
       {!loading && movie && (
         <>
@@ -77,12 +84,12 @@ export default function Swipe({ hidden, onShowMatches }) {
             </button>
           </div>
           <p className="swipe-progress">
-            {index + 1} / {movies.length}
+            {index + 1} / {deck.length}
           </p>
         </>
       )}
 
-      {!loading && !movie && !error && (
+      {!loading && !choosing && !movie && !error && (
         <div className="swipe-done">
           <h2>Kõik vaadatud! 🎉</h2>
           <button className="btn btn-primary" onClick={onShowMatches}>
