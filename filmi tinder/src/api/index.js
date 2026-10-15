@@ -1,35 +1,21 @@
 import { supabase } from './supabaseClient';
 
 /**
- * Genereerib täpselt 4 juhuslikku suurtähte (nt "XQZT")
- */
-function generateRoomCode() {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i < 4; i++) {
-    result += letters.charAt(Math.floor(Math.random() * letters.length));
-  }
-  return result;
-}
-
-/**
- * Loo uus tuba. Loojast saab user_slot 1.
+ * Loo uus tuba kutsuvalt Supabase Edge Functioni 'create-room'.
  * @returns {Promise<{ roomId: string, code: string }>}
  */
 export async function createRoom() {
-  const code = generateRoomCode();
-  
-  const { data, error } = await supabase
-    .from('rooms')
-    .insert([{ code }])
-    .select('id, code')
-    .single();
+  const { data, error } = await supabase.functions.invoke('create-room');
 
   if (error) {
     throw new Error(`Toa loomine ebaõnnestus: ${error.message}`);
   }
 
-  return { roomId: data.id, code: data.code };
+  if (data?.error) {
+    throw new Error(`Toa loomine ebaõnnestus: ${data.error}`);
+  }
+
+  return { roomId: data.roomId, code: data.code };
 }
 
 /**
@@ -105,7 +91,6 @@ export async function swipe(roomId, userSlot, movieId, liked) {
 
 /**
  * Tagastab toas tekkinud matchitud filmid (Movie[]).
- * Teeb matches ja movies tabelite vahel JOIN päringu.
  * @param {string} roomId 
  * @returns {Promise<Array<{ id: string, title: string, year: number, poster_url: string, genre: string }>>}
  */
@@ -146,7 +131,6 @@ export function onMatch(roomId, callback) {
       async (payload) => {
         const movieId = payload.new.movie_id;
 
-        // Laeme uue matchitud filmi täielikud andmed
         const { data: movie, error } = await supabase
           .from('movies')
           .select('id, title, year, poster_url, genre')
@@ -160,7 +144,6 @@ export function onMatch(roomId, callback) {
     )
     .subscribe();
 
-  // Tagastame funktsiooni kuulamise lõpetamiseks
   return () => {
     supabase.removeChannel(channel);
   };
