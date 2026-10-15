@@ -36,32 +36,3 @@ create table if not exists public.matches (
 
 create index if not exists swipes_room_movie_idx on public.swipes (room_id, movie_id);
 create index if not exists matches_room_idx      on public.matches (room_id);
-
--- Match tekib, kui mõlemad slotid on samale filmile andnud ❤️.
--- security definer: töötab sõltumata RLS poliitikatest matches tabelil.
-create or replace function public.create_match_on_swipe()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  if new.liked and exists (
-    select 1 from public.swipes s
-    where s.room_id   = new.room_id
-      and s.movie_id  = new.movie_id
-      and s.user_slot <> new.user_slot
-      and s.liked
-  ) then
-    insert into public.matches (room_id, movie_id)
-    values (new.room_id, new.movie_id)
-    on conflict (room_id, movie_id) do nothing;
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists swipes_create_match on public.swipes;
-create trigger swipes_create_match
-  after insert or update of liked on public.swipes
-  for each row execute function public.create_match_on_swipe();
