@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createRoom, joinRoom } from './tempMock.js'
+import { createRoom, joinRoom } from '../api/mock.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import './Home.css'
 
@@ -28,8 +28,8 @@ export default function Home() {
   async function handleJoin(e) {
     e.preventDefault()
     const clean = code.trim().toUpperCase()
-    if (!/^[A-Z]{4}$/.test(clean)) {
-      setError('Kood peab olema 4 tähte.')
+    if (!clean) {
+      setError('Sisesta toa kood.')
       return
     }
     setError('')
@@ -87,7 +87,7 @@ export default function Home() {
             className="code-input"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            maxLength={4}
+            maxLength={6}
             autoComplete="off"
             autoCapitalize="characters"
             placeholder="ABCD"
