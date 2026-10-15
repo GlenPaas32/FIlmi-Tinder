@@ -1,21 +1,40 @@
 import { supabase } from './supabaseClient';
 
 /**
- * Loo uus tuba kutsuvalt Supabase Edge Functioni 'create-room'.
+ * Genereerib täpselt 4 juhuslikku suurtähte (nt "XQZT")
+ */
+function generateRoomCode() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 4; i++) {
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  return result;
+}
+
+/**
+ * Loo uus tuba otse tabelisse 'rooms'. Loojast saab user_slot 1.
+ * (Edge Function 'create-room' pole deploy'tud, seega ei kasuta seda.)
  * @returns {Promise<{ roomId: string, code: string }>}
  */
 export async function createRoom() {
-  const { data, error } = await supabase.functions.invoke('create-room');
+  // Kui kood on juba kasutusel (UNIQUE viga 23505), proovime uue koodiga
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data, error } = await supabase
+      .from('rooms')
+      .insert([{ code: generateRoomCode() }])
+      .select('id, code')
+      .single();
 
-  if (error) {
-    throw new Error(`Toa loomine ebaõnnestus: ${error.message}`);
+    if (!error) {
+      return { roomId: data.id, code: data.code };
+    }
+    if (error.code !== '23505') {
+      throw new Error(`Toa loomine ebaõnnestus: ${error.message}`);
+    }
   }
 
-  if (data?.error) {
-    throw new Error(`Toa loomine ebaõnnestus: ${data.error}`);
-  }
-
-  return { roomId: data.roomId, code: data.code };
+  throw new Error('Toa loomine ebaõnnestus: vaba koodi ei leitud.');
 }
 
 /**
