@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMatches } from '../api/mock.js'
+import { getMatches } from '../api/index.js'
 import { useRoom } from '../components/RoomContext.jsx'
 import './Matches.css'
 
