@@ -1,14 +1,21 @@
+import { useState } from 'react'
 import { RoomProvider, useRoom } from './components/RoomContext.jsx'
 import Home from './pages/Home.jsx'
+import Swipe from './pages/Swipe.jsx'
 
 function Screens() {
   const { room } = useRoom()
+  const [showMatches, setShowMatches] = useState(false)
   if (!room) return <Home />
-  // TODO (F2): siia tuleb swipe-vaade
+  if (!showMatches) return <Swipe onShowMatches={() => setShowMatches(true)} />
+  // TODO (F4): siia tuleb matchide nimekiri
   return (
     <main style={{ padding: 24 }}>
-      <h2>Tuba {room.code}</h2>
-      <p>Oled kasutaja {room.userSlot}. Swipe-vaade tuleb issue F2-s.</p>
+      <h2>Meie nimekiri</h2>
+      <p>Matchide nimekiri tuleb issue F4-s.</p>
+      <button className="btn" onClick={() => setShowMatches(false)}>
+        ← Tagasi
+      </button>
     </main>
   )
 }

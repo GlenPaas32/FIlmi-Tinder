@@ -1,0 +1,24 @@
+.movie-card {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--code-bg);
+  box-shadow: var(--shadow);
+}
+
+.movie-poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: var(--border);
+}
+
+.movie-info {
+  padding: 12px 16px 16px;
+}
+
+.movie-title {
+  margin: 0 0 4px;
+}
