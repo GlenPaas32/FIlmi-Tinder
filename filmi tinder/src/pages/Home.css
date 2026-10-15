@@ -1,0 +1,91 @@
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.home-title {
+  margin: 0;
+}
+
+.home-sub {
+  max-width: 320px;
+}
+
+.home-actions,
+.home-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 2px solid var(--accent-border);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-link {
+  border: none;
+  padding: 8px;
+  font-weight: 400;
+}
+
+.room-code,
+.code-input {
+  font-family: var(--mono);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 12px;
+  text-align: center;
+  color: var(--text-h);
+}
+
+.room-code {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+}
+
+.code-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  text-transform: uppercase;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.home-error {
+  color: #e5484d;
+  font-weight: 600;
+}
