@@ -1,0 +1,70 @@
+.swipe {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.swipe-header {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swipe-header strong {
+  font-family: var(--mono);
+  color: var(--text-h);
+  letter-spacing: 2px;
+}
+
+.swipe-link {
+  font: inherit;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.swipe-buttons {
+  display: flex;
+  gap: 32px;
+}
+
+.swipe-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  font-size: 32px;
+  cursor: pointer;
+}
+
+.swipe-btn:active {
+  transform: scale(0.92);
+}
+
+.swipe-btn:disabled {
+  opacity: 0.6;
+}
+
+.swipe-progress {
+  font-size: 14px;
+}
+
+.swipe-done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
