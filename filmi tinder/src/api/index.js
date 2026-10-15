@@ -1,6 +1,8 @@
 import { supabase } from './supabaseClient';
 
-// Abifunktsioon toakoodi genereerimiseks: täpselt 4 suurtähte (A–Z)
+/**
+ * Genereerib täpselt 4 juhuslikku suurtähte (nt "XQZT")
+ */
 function generateRoomCode() {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -36,7 +38,6 @@ export async function createRoom() {
  * @returns {Promise<{ roomId: string }>}
  */
 export async function joinRoom(code) {
-  // Kontrollime, et kood on olemas
   if (!code || typeof code !== 'string' || !code.trim()) {
     throw new Error('Toakood on puudu.');
   }
@@ -61,7 +62,7 @@ export async function joinRoom(code) {
 }
 
 /**
- * Tagastab filmide nimekirja.
+ * Tagastab filmide nimekirja tabelist 'movies'.
  * @returns {Promise<Array<{ id: string, title: string, year: number, poster_url: string, genre: string }>>}
  */
 export async function getMovies() {
@@ -69,12 +70,15 @@ export async function getMovies() {
     .from('movies')
     .select('id, title, year, poster_url, genre');
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(`Filmide laadimine ebaõnnestus: ${error.message}`);
+  }
+
   return data || [];
 }
 
 /**
- * Salvestab kasutaja swipe-i.
+ * Lisab kasutaja swipe-i tabelisse 'swipes'.
  * @param {string} roomId 
  * @param {number} userSlot (1 või 2)
  * @param {string} movieId 
@@ -94,22 +98,31 @@ export async function swipe(roomId, userSlot, movieId, liked) {
       { onConflict: 'room_id,user_slot,movie_id' }
     );
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(`Swipe'i salvestamine ebaõnnestus: ${error.message}`);
+  }
 }
 
 /**
- * Tagastab toas tekkinud matchitud filmid.
+ * Tagastab toas tekkinud matchitud filmid (Movie[]).
+ * Teeb matches ja movies tabelite vahel JOIN päringu.
  * @param {string} roomId 
- * @returns {Promise<Array<Movie>>}
+ * @returns {Promise<Array<{ id: string, title: string, year: number, poster_url: string, genre: string }>>}
  */
 export async function getMatches(roomId) {
   const { data, error } = await supabase
     .from('matches')
-    .select('movie_id, movies(id, title, year, poster_url, genre)')
+    .select('movies (id, title, year, poster_url, genre)')
     .eq('room_id', roomId);
 
-  if (error) throw error;
-  return (data || []).map((item) => item.movies);
+  if (error) {
+    throw new Error(`Matchide pärimine ebaõnnestus: ${error.message}`);
+  }
+
+  // Supabase tagastab iga rea kujul { movies: { id, title, ... } }, teisendame puhtaks Movie[] massiiviks
+  return (data || [])
+    .map((item) => item.movies)
+    .filter(Boolean);
 }
 
 /**
@@ -133,7 +146,6 @@ export function onMatch(roomId, callback) {
       async (payload) => {
         const movieId = payload.new.movie_id;
 
-        // Laeme uue matchitud filmi andmed
         const { data: movie, error } = await supabase
           .from('movies')
           .select('id, title, year, poster_url, genre')
